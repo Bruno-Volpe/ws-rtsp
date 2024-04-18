@@ -1,0 +1,22 @@
+{
+  "name": "node-ffmpeg-rtsp",
+  "version": "1.0.0",
+  "main": "html/index.js",
+  "author": "Mael T.",
+  "license": "MIT",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "ffmpeg": "^0.0.4",
+    "node-rtsp-stream": "^0.0.9",
+    "rtsp-stream": "^1.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.27.0"
+  },
+  "keywords": [],
+  "description": ""
+}

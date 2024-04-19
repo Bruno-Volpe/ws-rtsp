@@ -1,3 +1,9 @@
+/*
+Comando ffmepg que roda camera 1: ffmpeg -rtsp_transport tcp -i "rtsp://admin:admin123@projetoxb.ddns-intelbras.com.br:554/cam/realmonitor?channel=1&subtype=0" -c copy teste.mkv
+Comando ffmepg que roda camera 2: ffmpeg -rtsp_transport tcp -i "rtsp://aguiahb:aguiahb99@aguiahb1.ddns-intelbras.com.br:8082/cam/realmonitor?channel=1&subtype=0" -c copy teste.mkv
+*/
+
+
 const express = require('express');
 const http = require('http');
 const bodyParser = require('body-parser'); // Adicionado para processar o corpo da solicitação POST
@@ -11,46 +17,38 @@ app.use(bodyParser.json()); // Adiciona middleware para processar o corpo JSON
 app.use(cors())
 app.use(bodyParser.urlencoded({ limit: '30mb', extended: true }))
 
+let stream = new Stream({
+  name: 'Stream1',  // Change the name as desired
+  //streamUrl: 'rtsp://admin:admin123@projetoxb.ddns-intelbras.com.br:554/cam/realmonitor?channel=1&subtype=0',
+  streamUrl: 'rtsp://aguiahb:aguiahb99@aguiahb1.ddns-intelbras.com.br:8082/cam/realmonitor?channel=1&subtype=0',
+  wsPort: 6789, // Maintain the same websocket port
+  ffmpegOptions: {
+    '-rtsp_transport': 'tcp', // Adicione esta linha
+    '-codec:v': 'mpeg1video',
+    '-r': 30,
+    '-f': 'mpegts',
+    '-b:v': '2000k',
+  },
+});
+
 // let stream = new Stream({
-//   name: 'Stream1',  // Change the name as desired
-//   //streamUrl: 'rtsp://admin:admin123@projetoxb.ddns-intelbras.com.br:554/cam/realmonitor?channel=1&subtype=0',
-//   streamUrl: 'rtsp://aguiahb:aguiahb99@aguiahb1.ddns-intelbras.com.br:8082/cam/realmonitor?channel=1&subtype=0',
-//   wsPort: 6789, // Maintain the same websocket port
+//   name: 'Bunny',
+//   //streamUrl: 'rtsp://aguiahb:aguiahb99@aguiahb1.ddns-intelbras.com.br:8082/cam/realmonitor?channel=1&subtype=0',
+//   streamUrl: 'rtsp://admin:admin123@projetoxb.ddns-intelbras.com.br:554/cam/realmonitor?channel=1&subtype=0',
+//   wsPort: 6789,
 //   ffmpegOptions: {
 //     '-f': 'mpegts',
-//     '-codec:v': 'h265',
+//     '-codec:v': 'mpeg1video',
 //     '-b:v': '2000k',
 //     '-stats': '',
-//     '-r': 15, // Ajuste para a taxa de quadros real do stream 1
+//     '-r': 25,
 //     '-bf': 0,
 //     '-codec:a': 'mp2',
 //     '-ar': 44100,
 //     '-ac': 1,
 //     '-b:a': '128k',
-//     '-ss': '0', // Iniciar no início do stream 1
-//     '-t': '0', // Codificar o stream completo (ajuste para tempo específico se necessário)
-//     '-frames': '0', // Ignorar (codificar o stream completo)
 //   },
 // });
-
-let stream = new Stream({
-  name: 'Bunny',
-  //streamUrl: 'rtsp://aguiahb:aguiahb99@aguiahb1.ddns-intelbras.com.br:8082/cam/realmonitor?channel=1&subtype=0',
-  streamUrl: 'rtsp://admin:admin123@projetoxb.ddns-intelbras.com.br:554/cam/realmonitor?channel=1&subtype=0',
-  wsPort: 6789,
-  ffmpegOptions: {
-    '-f': 'mpegts',
-    '-codec:v': 'mpeg1video',
-    '-b:v': '2000k',
-    '-stats': '',
-    '-r': 25,
-    '-bf': 0,
-    '-codec:a': 'mp2',
-    '-ar': 44100,
-    '-ac': 1,
-    '-b:a': '128k',
-  },
-});
 
 // Rota para acessar o stream
 // app.get('/stream', (req, res) => {

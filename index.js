@@ -8,10 +8,11 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
+let ffmpeg;
 const wss = new WebSocket.Server({ port: 6789 });
 
 wss.on('connection', ws => {
-    const ffmpeg = spawn('ffmpeg', [
+    ffmpeg = spawn('ffmpeg', [
         '-rtsp_transport',
         'tcp',
         '-i',
@@ -38,6 +39,30 @@ wss.on('connection', ws => {
     ws.on('close', () => {
         ffmpeg.kill('SIGINT');
     });
+});
+
+app.post('/changestream', (req, res) => {
+    if (ffmpeg) {
+        ffmpeg.kill('SIGINT');
+    }
+
+    if (!req.body.streamUrl) {
+        res.status(400).send('Stream URL is required');
+    }
+
+    ffmpeg = spawn('ffmpeg', [
+        '-rtsp_transport',
+        'tcp',
+        '-i',
+        req.body.streamUrl,
+        '-f',
+        'mpegts',
+        '-codec:v',
+        'mpeg1video',
+        '-'
+    ]);
+
+    res.status(200).json({ message: 'Stream changed' });
 });
 
 app.listen(3030, () => {

@@ -17,10 +17,13 @@ wss.on('connection', ws => {
         'tcp',
         '-i',
         'rtsp://aguiahb:aguiahb99@aguiahb1.ddns-intelbras.com.br:8082/cam/realmonitor?channel=1&subtype=0',
+        //rtsp://admin:admin123@projetoxb.ddns-intelbras.com.br:554/cam/realmonitor?channel=1&subtype=0',
         '-f',
         'mpegts',
         '-codec:v',
         'mpeg1video',
+        '-loglevel',
+        'error',
         '-'
     ]);
 
@@ -59,6 +62,8 @@ app.post('/changestream', (req, res) => {
         'mpegts',
         '-codec:v',
         'mpeg1video',
+        '-loglevel',
+        'error',
         '-'
     ]);
 

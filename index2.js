@@ -35,10 +35,6 @@ const startFFmpeg = (ws) => {
 
     ffmpeg.on('close', code => {
         console.log(`child process exited with code ${code}`);
-        // Restart ffmpeg if it crashes
-        if (ws.readyState === WebSocket.OPEN) {
-            startFFmpeg(ws);
-        }
     });
 
     ws.on('close', () => {
@@ -63,31 +59,35 @@ const startWebSocketServer = () => {
 
 startWebSocketServer();
 
-const stopFFmpeg = (callback) => {
-    if (ffmpeg) {
-        ffmpeg.on('close', () => {
-            console.log('ffmpeg process killed');
-            ffmpeg = null;
-            if (callback) callback();
-        });
-        ffmpeg.kill('SIGINT');
-    } else if (callback) {
-        callback();
-    }
-};
-
 app.post('/changeUrl', (req, res) => {
     streamUrl = req.body.stream;
-    if (!streamUrl) {
-        return res.status(400).json({ message: 'Stream URL is required' });
-    }
 
-    stopFFmpeg(() => {
-        if (currentWs && currentWs.readyState === WebSocket.OPEN) {
-            startFFmpeg(currentWs);
-        }
-        res.status(200).json({ message: 'Stream changed' });
-    });
+    // Close all WebSocket connections and the WebSocket server
+    if (wss) {
+        wss.clients.forEach(client => {
+            client.terminate();
+        });
+        wss.close(() => {
+            console.log('WebSocket server closed');
+
+            // Kill the ffmpeg process
+            if (ffmpeg) {
+                ffmpeg.kill('SIGINT');
+                ffmpeg.on('close', () => {
+                    console.log('ffmpeg process killed');
+                    // Restart the WebSocket server
+                    startWebSocketServer();
+                    res.status(200).json({ message: 'Stream changed' });
+                });
+            } else {
+                // Restart the WebSocket server if ffmpeg is not running
+                startWebSocketServer();
+                res.status(200).json({ message: 'Stream changed' });
+            }
+        });
+    } else {
+        res.status(500).json({ message: 'WebSocket server not running' });
+    }
 });
 
 app.listen(3030, () => {
